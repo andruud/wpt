@@ -1,0 +1,89 @@
+<html>
+<head>
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="/resources/testdriver.js"></script>
+<script src="/resources/testdriver-actions.js"></script>
+<script src="/resources/testdriver-vendor.js"></script>
+
+</head>
+<body onload=runTest()>
+    <p>Moving the cursor using the arrow keys into an
+        input element fires scroll events when text has to scroll into view.
+        Uses arrow keys to move forward and backwards in the input
+        element.</p>
+    <input type="text" style='width: 50px'
+    value="Fooooooooooooooooooooooooooooooooooooooooooooooooo">
+
+ <script>
+
+async function moveCursorRightInsideInput(element, value){
+    var arrowRight = '\uE014';
+    for(var i=0;i<value;i++){
+      await test_driver.send_keys(element, arrowRight);
+    }
+}
+
+async function moveCursorLeftInsideInput(element, value){
+    var arrowLeft = '\uE012';
+    for(var i=0;i<value;i++){
+      await test_driver.send_keys(element, arrowLeft);
+    }
+}
+
+
+function runTest(){
+    promise_test(async(t) => { return new Promise(async (resolve, reject) => {
+      var input = document.getElementsByTagName('input')[0];
+      var numberOfKeyPresses = 7;
+
+      function handleScroll(){
+        removeEventListener();
+        resolve("Scroll Event successfully fired!");
+      }
+
+      function removeEventListener(){
+        input.removeEventListener('scroll', handleScroll, false);
+      }
+
+      input.addEventListener('scroll', handleScroll, false);
+      await moveCursorRightInsideInput(input, numberOfKeyPresses);
+      // if there is no scroll event then fail the test
+      t.step_timeout(function() {
+        removeEventListener();
+        reject("Scroll Event not fired!");
+      }, 10);
+    })}, 'Moving the cursor using the arrow keys into an ' +
+        'input element fires scroll events when text has to scroll into view.' +
+        'Uses arrow keys to move right in the input element.');
+
+promise_test(async(t) => { return new Promise(async (resolve, reject) => {
+      var input = document.getElementsByTagName('input')[0];
+      var numberOfKeyPresses = 7;
+
+      input.focus();
+      input.setSelectionRange(8,8);
+
+      function handleScroll(){
+         removeEventListener();
+         resolve("Scroll Event successfully fired!");
+      }
+      function removeEventListener(){
+        input.removeEventListener('scroll', handleScroll, false);
+      }
+
+      input.addEventListener('scroll', handleScroll, false);
+      await moveCursorLeftInsideInput(input, numberOfKeyPresses);
+      // if there is no scroll event then fail the test
+      t.step_timeout(function() {
+        removeEventListener();
+        reject("Scroll Event not fired!");
+      }, 10);
+    })}, 'Moving the cursor using the arrow keys into an ' +
+        'input element fires scroll events when text has to scroll into view.' +
+        'Uses arrow keys to move forward and backwards in the input ' +
+        'element.');
+}
+</script>
+</body>
+</html>
