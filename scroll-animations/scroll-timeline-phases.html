@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset=utf-8>
+<title>Test basic functionality of scroll timeline phases.</title>
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="/web-animations/testcommon.js"></script>
+<style>
+  .scroller {
+    overflow: auto;
+    height: 100px;
+    width: 100px;
+  }
+  .contents {
+    height: 1000px;
+    width: 100%;
+  }
+</style>
+<div id="log"></div>
+<script>
+  'use strict';
+
+  function createScroller(test) {
+    var scroller = createDiv(test);
+    scroller.innerHTML = "<div class='contents'></div>";
+    scroller.classList.add('scroller');
+    return scroller;
+  }
+
+  function createScrollTimeline(test) {
+    return new ScrollTimeline({
+      scrollSource: createScroller(test),
+      timeRange: 1000
+    });
+  }
+
+  promise_test(async t => {
+    const timeline = createScrollTimeline(t);
+    assert_equals(timeline.phase, "inactive");
+  }, 'Scroll timeline phase is initialized to "inactive".');
+
+  promise_test(async t => {
+    const timeline = createScrollTimeline(t);
+    assert_throws_js(TypeError, () => {
+      timeline.phase = "in-range";
+    });
+  }, 'Setting scroll timeline phase (which is readonly) throws TypeError.');
+</script>
